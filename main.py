@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-
+from typing import Optional
+from pydantic import BaseModel
 
 app=FastAPI()
 
@@ -32,3 +33,39 @@ def read_items(skip: int = 0, limit: int = 10):
         "limit": limit
     }
     
+@app.get("/items/{item_id}")
+def read_item(item_id: int, q: Optional[str] = None):
+    if q:
+        return {"item_id": item_id, "q": q}
+    return {"item_id": item_id}
+
+class Item(BaseModel):
+    name: str
+    description: str = None
+    price: float
+    
+# @app.post("/items/")
+# def create_item(item: Item):
+#     return {
+#         "name": item.name,
+#         "price": item.price
+#     }
+    
+class Item(BaseModel):
+    id: int
+    name: str
+    price: float
+    
+class ItemResponse(BaseModel):
+    id: int
+    name: str
+    price: float
+
+@app.post("/items/", response_model=ItemResponse)
+def create_item(item: Item):
+    # Imagine this saves to database
+    return {
+        "id": 1,
+        "name": item.name,
+        "price": item.price
+    }
